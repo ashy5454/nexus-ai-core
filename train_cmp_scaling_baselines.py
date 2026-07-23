@@ -14,7 +14,7 @@ from cmp_scaling_sweep import ScaledCMPModel
 ================================================================================
 CMP STAGE 1 & 2 BASELINE PRE-TRAINING ENGINE (50M & 150M MODELS)
 ================================================================================
-Data Sources: Hugging Face 'wikitext-103-raw-v1' / 'bigcode/starcoderdata'
+Data Sources: Hugging Face 'HuggingFaceFW/fineweb' / 'bigcode/starcoderdata'
 Execution: 100% Local Gradient-Free Competitive Memory Updates (NO BACKPROP)
 ================================================================================
 """
@@ -22,14 +22,14 @@ Execution: 100% Local Gradient-Free Competitive Memory Updates (NO BACKPROP)
 def get_dataset_stream():
     try:
         from datasets import load_dataset
-        print("📡 Streaming Hugging Face Dataset ('wikitext-103-raw-v1')...")
-        ds = load_dataset("wikitext", "wikitext-103-raw-v1", split="train", streaming=True)
+        print("📡 Streaming Hugging Face Dataset ('HuggingFaceFW/fineweb')...")
+        ds = load_dataset("HuggingFaceFW/fineweb", name="sample-10BT", split="train", streaming=True)
         return ds
     except Exception as e:
-        print(f"⚠️ Dataset stream notice ({e}). Using synthetic stream.")
+        print(f"⚠️ Dataset stream notice ({e}). Using synthetic pattern stream.")
         return None
 
-def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500, batch_size=8, seq_len=128):
+def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500, batch_size=16, seq_len=128):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n================================================================================")
     print(f"🚀 PRE-TRAINING [{model_name}] ON {device}")
@@ -70,7 +70,7 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500,
                     if step % 100 == 0:
                         elapsed = time.time() - start_time
                         tok_sec = total_tokens / elapsed
-                        print(f"  * Step [{step}/{max_steps}] | Tokens: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
+                        print(f"  * Step [{step}/{max_steps}] | Tokens Processed: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
 
                     if step >= max_steps:
                         break
@@ -83,7 +83,7 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500,
             if step % 100 == 0:
                 elapsed = time.time() - start_time
                 tok_sec = total_tokens / elapsed
-                print(f"  * Step [{step}/{max_steps}] | Tokens: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
+                print(f"  * Step [{step}/{max_steps}] | Tokens Processed: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
 
     elapsed_total = time.time() - start_time
     save_path = f"{model_name.lower().replace('-', '_')}_weights.pt"
