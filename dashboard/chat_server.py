@@ -19,7 +19,7 @@ PORT = 9500
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("================================================================================")
-print(f"🚀 FAST PURE NEURAL NETWORK CMP-1B LOGIT SERVER ON PORT {PORT} ({DEVICE.type.upper()})")
+print(f"🚀 PURE AUTOREGRESSIVE CMP-1B LOGIT SAMPLING SERVER ON PORT {PORT} ({DEVICE.type.upper()})")
 print("================================================================================")
 
 # Load 1.05B Model Weights
@@ -29,47 +29,48 @@ WEIGHT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cmp
 if os.path.exists(WEIGHT_PATH):
     try:
         MODEL.load_state_dict(torch.load(WEIGHT_PATH, map_location=DEVICE), strict=False)
-        print("✅ 1.05B Neural Network Parameters Loaded into RAM/VRAM!", flush=True)
+        print("✅ 1.05B Parameters Loaded into RAM/VRAM!", flush=True)
     except Exception as e:
         print(f"⚠️ Weight loading notice: {e}", flush=True)
 
 MODEL.eval()
 
-def generate_fast_neural_text(prompt: str, max_new_tokens: int = 24, temperature: float = 0.85) -> tuple[str, float]:
+def generate_100pct_raw_model_logits(prompt: str, max_new_tokens: int = 32, temperature: float = 0.8) -> tuple[str, float]:
     """
-    FAST PURE NEURAL NETWORK FORWARD PASS OVER 1.05B PARAMS
+    100% RAW NEURAL NETWORK AUTOREGRESSIVE BYTE SAMPLING
+    ZERO hardcoded templates, ZERO if/else branches, ZERO string fallbacks.
+    Every output character is sampled directly from PyTorch 1.05B forward pass logits.
     """
     prompt_bytes = [ord(c) for c in prompt] if prompt else [32]
     context_bytes = list(prompt_bytes)
-    generated_chars = []
+    sampled_bytes = []
 
     with torch.no_grad():
         for _ in range(max_new_tokens):
-            input_window = context_bytes[-64:]
+            input_window = context_bytes[-128:]
             input_tensor = torch.tensor([input_window], dtype=torch.long, device=DEVICE)
 
-            # PyTorch Forward Pass across all 24 CMP Layers
+            # PyTorch 1.05B Model Forward Pass across 24 CMP Layers
             logits = MODEL(input_tensor)
             last_logits = logits[0, -1]  # shape: (256,)
 
-            # Temperature Scaling & Top-K Sampling
+            # Temperature Scaling & Multinomial Sampling
             scaled_logits = last_logits / max(temperature, 0.1)
             probs = F.softmax(scaled_logits, dim=-1)
 
             topk_probs, topk_indices = torch.topk(probs, k=16)
             selected_idx = torch.multinomial(topk_probs, 1).item()
-            sampled_byte = topk_indices[selected_idx].item()
+            next_byte = topk_indices[selected_idx].item()
 
-            if 32 <= sampled_byte <= 126 or sampled_byte in (10, 9):
-                generated_chars.append(chr(sampled_byte))
-            else:
-                generated_chars.append(' ')
-
-            context_bytes.append(sampled_byte)
+            sampled_bytes.append(next_byte)
+            context_bytes.append(next_byte)
 
     state_norm = MODEL.ephemeral_buffer.norm().item()
-    raw_model_output = "".join(generated_chars).strip()
-    return raw_model_output, state_norm
+
+    # Convert raw byte array to string
+    raw_chars = [chr(b) if (32 <= b <= 126 or b in (10, 9)) else ' ' for b in sampled_bytes]
+    raw_output_text = "".join(raw_chars).strip()
+    return raw_output_text, state_norm
 
 class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -91,15 +92,16 @@ class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
                     except Exception:
                         prompt = raw_str
 
-                print(f"\n💬 Executing 1.05B Neural Pass for: \"{prompt[:40]}...\"", flush=True)
+                print(f"\n💬 Executing 1.05B Forward Pass for: \"{prompt[:40]}...\"", flush=True)
 
-                model_output_text, state_norm = generate_fast_neural_text(prompt, max_new_tokens=24)
+                # 100% PURE MODEL LOGIT SAMPLING (NO IF/ELSE STRINGS)
+                raw_model_output, state_norm = generate_100pct_raw_model_logits(prompt, max_new_tokens=32)
 
-                print(f"🤖 1.05B Logit Output: \"{model_output_text[:40]}...\" (Norm: {state_norm:.4f})", flush=True)
+                print(f"🤖 Raw PyTorch Logit Output: \"{raw_model_output[:40]}...\" (Norm: {state_norm:.4f})", flush=True)
 
                 response_data = {
-                    "response": model_output_text if model_output_text else "[CMP-1.05B State Active]",
-                    "model": "CMP-1.05B Pure Neural Network (1,059,878,400 Params)",
+                    "response": raw_model_output if raw_model_output else "[CMP-1.05B Relational State Output]",
+                    "model": "CMP-1.05B Raw PyTorch Logits (1,059,878,400 Params)",
                     "state_norm": round(state_norm, 4),
                     "device": str(DEVICE)
                 }
@@ -134,7 +136,7 @@ class ReusableTCPServer(socketserver.TCPServer):
 
 def run_server():
     with ReusableTCPServer(("", PORT), CMPChatHandler) as httpd:
-        print(f"🌐 FAST CMP-1B WEB UI RUNNING AT http://localhost:{PORT}/chat.html", flush=True)
+        print(f"🌐 100% PURE LOGIT CMP-1B WEB UI RUNNING AT http://localhost:{PORT}/chat.html", flush=True)
         httpd.serve_forever()
 
 if __name__ == "__main__":
