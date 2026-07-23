@@ -32,7 +32,7 @@ async function sendMessage(event) {
     messagesList.scrollTop = messagesList.scrollHeight;
 
     try {
-        const response = await fetch("http://localhost:9000/api/chat", {
+        const response = await fetch("http://localhost:9500/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: messageText })
@@ -78,7 +78,7 @@ async function sendMessage(event) {
         errDiv.innerHTML = `
             <div class="avatar">⚠️</div>
             <div class="msg-content" style="color: #f87171;">
-                <p>Error connecting to CMP-1B backend on http://localhost:9000. Check server logs.</p>
+                <p>Error connecting to CMP-1B backend on http://localhost:9500.</p>
             </div>
         `;
         messagesList.appendChild(errDiv);
