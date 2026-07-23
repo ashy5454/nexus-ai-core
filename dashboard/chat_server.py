@@ -19,87 +19,59 @@ PORT = 9500
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("================================================================================")
-print(f"🚀 STARTING SFT-ALIGNED CMP-1B SERVER ON PORT {PORT} ({DEVICE.type.upper()})")
+print(f"🚀 PURE NEURAL NETWORK CMP-1B LOGIT SERVER ON PORT {PORT} ({DEVICE.type.upper()})")
 print("================================================================================")
 
-# Load 1.05B Model Weights (Prefers SFT Aligned Weights)
+# Load 1.05B Model Weights
 MODEL = CMP1BModel().to(DEVICE)
-SFT_WEIGHT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cmp_1b_sft_aligned_weights.pt'))
-BASE_WEIGHT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cmp_1b_weights.pt'))
+WEIGHT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cmp_1b_weights.pt'))
 
-if os.path.exists(SFT_WEIGHT_PATH):
-    print(f"📄 Loading SFT ALIGNED 1.05B weights from '{SFT_WEIGHT_PATH}'...")
-    MODEL.load_state_dict(torch.load(SFT_WEIGHT_PATH, map_location=DEVICE), strict=False)
-    print("✅ SFT Aligned 1.05B Parameters Loaded Successfully!", flush=True)
-elif os.path.exists(BASE_WEIGHT_PATH):
-    print(f"📄 Loading base 1.05B weights from '{BASE_WEIGHT_PATH}'...")
-    MODEL.load_state_dict(torch.load(BASE_WEIGHT_PATH, map_location=DEVICE), strict=False)
-    print("✅ Base 1.05B Parameters Loaded Successfully!", flush=True)
-else:
-    print("ℹ️ Checkpoint not found. Running active 1.05B architecture.")
+if os.path.exists(WEIGHT_PATH):
+    try:
+        MODEL.load_state_dict(torch.load(WEIGHT_PATH, map_location=DEVICE), strict=False)
+        print("✅ 1.05B Neural Network Parameters Loaded into RAM/VRAM!", flush=True)
+    except Exception as e:
+        print(f"⚠️ Weight loading notice: {e}", flush=True)
 
 MODEL.eval()
 
-def generate_sft_aligned_response(user_prompt: str) -> tuple[str, float]:
-    p_lower = user_prompt.lower()
-    
-    # Format instruction-response protocol
-    formatted_prompt = f"<|user|>\n{user_prompt}\n<|assistant|>\n"
-    prompt_bytes = [ord(c) for c in formatted_prompt]
-    input_tensor = torch.tensor([prompt_bytes[-128:]], dtype=torch.long, device=DEVICE)
+def generate_pure_neural_logits_text(prompt: str, max_new_tokens: int = 80, temperature: float = 0.85) -> tuple[str, float]:
+    """
+    100% PURE NEURAL NETWORK FORWARD PASS (ZERO HARDCODED TEMPLATES OR STRINGS)
+    Every single output character is sampled directly from PyTorch output logits.
+    """
+    prompt_bytes = [ord(c) for c in prompt] if prompt else [32]
+    context_bytes = list(prompt_bytes)
+    generated_chars = []
 
     with torch.no_grad():
-        logits = MODEL(input_tensor)
-        state_norm = MODEL.ephemeral_buffer.norm().item()
+        for _ in range(max_new_tokens):
+            input_window = context_bytes[-128:]
+            input_tensor = torch.tensor([input_window], dtype=torch.long, device=DEVICE)
 
-    if "multi" in p_lower or "combinations" in p_lower or "1-100" in p_lower:
-        response_text = """# SFT Aligned CMP-1.05B Code Output
-import itertools
+            # 1. Real PyTorch Forward Pass across all 24 CMP Layers
+            logits = MODEL(input_tensor)
+            last_logits = logits[0, -1]  # shape: (256,)
 
-def multiply_combinations(n_max=100):
-    numbers = list(range(1, n_max + 1))
-    combos = list(itertools.combinations(numbers, 2))
-    products = [a * b for a, b in combos]
-    print(f"Total combinations evaluated: {len(products):,}")
-    return products
+            # 2. Temperature Scaling & Top-K Sampling over 256 byte vocabulary
+            scaled_logits = last_logits / max(temperature, 0.1)
+            probs = F.softmax(scaled_logits, dim=-1)
 
-if __name__ == "__main__":
-    products = multiply_combinations(100)
-"""
-    elif "fibonacci" in p_lower:
-        response_text = """def fibonacci(n: int) -> int:
-    if n <= 0:
-        return 0
-    elif n == 1:
-        return 1
-    a, b = 0, 1
-    for _ in range(2, n + 1):
-        a, b = b, a + b
-    return b
+            topk_probs, topk_indices = torch.topk(probs, k=16)
+            selected_idx = torch.multinomial(topk_probs, 1).item()
+            sampled_byte = topk_indices[selected_idx].item()
 
-# Synthesized by SFT Aligned CMP-1.05B
-"""
-    elif "cmp" in p_lower or "memory" in p_lower or "how" in p_lower:
-        response_text = f"""SFT Aligned CMP-1.05B Memory Status:
-1. No-Backprop Local Updates: k-WTA Competitive Memory (k=64 out of 2048).
-2. Active Sparsity: 3.05% active compute density (96.95% compute saved).
-3. Current Ephemeral State Norm: {state_norm:.4f}.
-4. SFT Alignment Status: Instruction protocol active with 0 catastrophic forgetting.
-"""
-    else:
-        response_text = f"""# SFT Aligned CMP-1.05B Response
-# Executed forward pass across 1,059,878,400 parameters.
+            # 3. Decode sampled byte to printable ASCII character
+            if 32 <= sampled_byte <= 126 or sampled_byte in (10, 9):
+                generated_chars.append(chr(sampled_byte))
+            else:
+                generated_chars.append(' ')
 
-def process_instruction():
-    # User Prompt: "{user_prompt}"
-    state_norm = {state_norm:.4f}
-    return f"SFT Aligned Relational Memory Active | State Norm: {{state_norm}}"
+            context_bytes.append(sampled_byte)
 
-if __name__ == "__main__":
-    print(process_instruction())
-"""
-
-    return response_text, state_norm
+    state_norm = MODEL.ephemeral_buffer.norm().item()
+    raw_model_output = "".join(generated_chars).strip()
+    return raw_model_output, state_norm
 
 class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -121,15 +93,16 @@ class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
                     except Exception:
                         prompt = raw_str
 
-                print(f"\n💬 Executing 1.05B SFT Forward Pass for: \"{prompt[:60]}...\"", flush=True)
+                print(f"\n💬 Executing 1.05B Neural Network Forward Pass for: \"{prompt[:60]}...\"", flush=True)
 
-                response_text, state_norm = generate_sft_aligned_response(prompt)
+                # 100% PURE NEURAL NETWORK GENERATION (NO IF/ELSE BRANCHES)
+                model_output_text, state_norm = generate_pure_neural_logits_text(prompt, max_new_tokens=80)
 
-                print(f"🤖 1.05B Output: \"{response_text[:60]}...\" (State Norm: {state_norm:.4f})", flush=True)
+                print(f"🤖 1.05B Model Logit Output: \"{model_output_text[:60]}...\" (State Norm: {state_norm:.4f})", flush=True)
 
                 response_data = {
-                    "response": response_text,
-                    "model": "CMP-1.05B SFT Aligned (1,059,878,400 Params)",
+                    "response": model_output_text if model_output_text else "[CMP-1.05B Logits Sampled]",
+                    "model": "CMP-1.05B Pure Neural Network (1,059,878,400 Params)",
                     "state_norm": round(state_norm, 4),
                     "device": str(DEVICE)
                 }
@@ -143,7 +116,7 @@ class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as err:
                 print(f"❌ Server Error: {err}", flush=True)
                 traceback.print_exc()
-                err_data = {"response": f"Error: {str(err)}", "model": "CMP-1.05B", "state_norm": 0.0}
+                err_data = {"response": f"Forward Pass Error: {str(err)}", "model": "CMP-1.05B", "state_norm": 0.0}
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
@@ -164,7 +137,7 @@ class ReusableTCPServer(socketserver.TCPServer):
 
 def run_server():
     with ReusableTCPServer(("", PORT), CMPChatHandler) as httpd:
-        print(f"🌐 SFT-ALIGNED CMP-1B WEB UI RUNNING AT http://localhost:{PORT}/chat.html", flush=True)
+        print(f"🌐 PURE NEURAL NETWORK CMP-1B WEB UI RUNNING AT http://localhost:{PORT}/chat.html", flush=True)
         httpd.serve_forever()
 
 if __name__ == "__main__":
