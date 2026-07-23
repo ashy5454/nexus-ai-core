@@ -1,0 +1,22 @@
+{
+  "name": "nexus-ai-core",
+  "version": "1.0.0",
+  "description": "A lightweight, modular JavaScript/TypeScript framework for AI agents, multi-agent workflows, tool execution, and memory management.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test/framework.test.js",
+    "example": "node examples/multi_agent_researcher.js"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "llm",
+    "workflow",
+    "multi-agent",
+    "orchestrator",
+    "tools"
+  ],
+  "author": "ashy5454",
+  "license": "MIT"
+}
