@@ -12,11 +12,10 @@ from cmp_scaling_sweep import ScaledCMPModel
 
 """
 ================================================================================
-CMP FULL CONVERGENCE PRE-TRAINING ENGINE (50,000+ STEPS / 1B+ TOKENS)
+CMP ULTRA-FAST FULL CONVERGENCE PRE-TRAINING ENGINE (BATCH SIZE = 128)
 ================================================================================
-Target: Full compute-optimal convergence under arXiv:2607.17944 scaling laws.
-Data Sources: Hugging Face 'HuggingFaceFW/fineweb' / 'bigcode/starcoderdata'
-Execution: 100% Local Gradient-Free Competitive Memory Updates (NO BACKPROP)
+Optimized GPU Memory Batching: batch_size = 128 (16,384 tokens/step)
+Target: 4x-5x Speedup for 100M+ Token Full Convergence on Tesla T4 GPU
 ================================================================================
 """
 
@@ -30,18 +29,22 @@ def get_dataset_stream():
         print(f"⚠️ Dataset stream notice ({e}). Using synthetic pattern stream.", flush=True)
         return None
 
-def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=50000, batch_size=16, seq_len=128):
+def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=6250, batch_size=128, seq_len=128):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n================================================================================", flush=True)
-    print(f"🚀 FULL CONVERGENCE PRE-TRAINING [{model_name}] ON {device} ({max_steps:,} STEPS)", flush=True)
+    print(f"⚡ HIGH-THROUGHPUT PRE-TRAINING [{model_name}] ON {device} (BATCH SIZE: {batch_size})", flush=True)
     print(f"================================================================================", flush=True)
 
     model = ScaledCMPModel(d_model=d_model, n_layers=n_layers, k_active=k_active).to(device)
     total_params = sum(p.numel() for p in model.parameters())
 
+    tokens_per_step = batch_size * seq_len
+    target_tokens = max_steps * tokens_per_step
+
     print(f"  * Total Parameters  : {total_params:,} ({total_params/1e6:.1f} Million)", flush=True)
     print(f"  * Active Sparsity k : {k_active} out of {d_model} ({(k_active/d_model)*100:.2f}%)", flush=True)
-    print(f"  * Target Tokens     : {max_steps * batch_size * seq_len:,} Tokens", flush=True)
+    print(f"  * Batch Size / Step : {batch_size} sequences ({tokens_per_step:,} tokens/step)", flush=True)
+    print(f"  * Target Tokens     : {target_tokens:,} Tokens", flush=True)
     print(f"  * Learning Algorithm: Gradient-Free Competitive Memory (NO BACKPROP)", flush=True)
 
     torch.set_grad_enabled(False)
@@ -66,15 +69,15 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=5000
                     step += 1
                     input_tensor = torch.tensor(batch_seqs, dtype=torch.long, device=device)
                     model(input_tensor)
-                    total_tokens += batch_size * seq_len
+                    total_tokens += tokens_per_step
                     batch_seqs = []
 
-                    if step % 500 == 0:
+                    if step % 250 == 0:
                         elapsed = time.time() - start_time
                         tok_sec = total_tokens / elapsed
                         progress_pct = (step / max_steps) * 100.0
                         eta_mins = ((max_steps - step) * (elapsed / step)) / 60.0
-                        print(f"  * Step [{step:,}/{max_steps:,}] ({progress_pct:.1f}%) | Tokens: {total_tokens:,} | Speed: {tok_sec:.1f} tok/sec | ETA: {eta_mins:.1f}m", flush=True)
+                        print(f"  ⚡ Step [{step:,}/{max_steps:,}] ({progress_pct:.1f}%) | Tokens: {total_tokens:,} | Speed: {tok_sec:.1f} tok/sec | ETA: {eta_mins:.1f}m", flush=True)
 
                     if step >= max_steps:
                         break
@@ -82,14 +85,14 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=5000
         for step in range(1, max_steps + 1):
             input_tensor = torch.randint(0, 256, (batch_size, seq_len), device=device)
             model(input_tensor)
-            total_tokens += batch_size * seq_len
+            total_tokens += tokens_per_step
 
-            if step % 500 == 0:
+            if step % 250 == 0:
                 elapsed = time.time() - start_time
                 tok_sec = total_tokens / elapsed
                 progress_pct = (step / max_steps) * 100.0
                 eta_mins = ((max_steps - step) * (elapsed / step)) / 60.0
-                print(f"  * Step [{step:,}/{max_steps:,}] ({progress_pct:.1f}%) | Tokens: {total_tokens:,} | Speed: {tok_sec:.1f} tok/sec | ETA: {eta_mins:.1f}m", flush=True)
+                print(f"  ⚡ Step [{step:,}/{max_steps:,}] ({progress_pct:.1f}%) | Tokens: {total_tokens:,} | Speed: {tok_sec:.1f} tok/sec | ETA: {eta_mins:.1f}m", flush=True)
 
     elapsed_total = time.time() - start_time
     save_path = f"{model_name.lower().replace('-', '_').replace('.', '_')}_converged_weights.pt"
@@ -100,29 +103,31 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=5000
 
 def main():
     print("================================================================================", flush=True)
-    print("🎯 ARKADHI LABS - FULL CONVERGENCE PRE-TRAINING RUN (1B+ TOKENS)", flush=True)
+    print("🎯 ARKADHI LABS - HIGH-THROUGHPUT CONVERGENCE RUN (BATCH SIZE = 128)", flush=True)
     print("================================================================================", flush=True)
 
-    # 1. CMP-50M Full Convergence (50,000 steps = 1.02 Billion tokens)
+    # 1. CMP-50M Full Convergence (6,250 steps x 16,384 tokens/step = 102.4 Million tokens, ~5 mins)
     train_baseline_model(
         model_name="CMP-50M",
         d_model=512,
         n_layers=20,
         k_active=16,
-        max_steps=50000
+        batch_size=128,
+        max_steps=6250
     )
 
-    # 2. CMP-150M Full Convergence (150,000 steps = 3.07 Billion tokens)
+    # 2. CMP-150M Full Convergence (18,750 steps x 16,384 tokens/step = 307.2 Million tokens, ~20 mins)
     train_baseline_model(
         model_name="CMP-150M",
         d_model=864,
         n_layers=20,
         k_active=27,
-        max_steps=150000
+        batch_size=128,
+        max_steps=18750
     )
 
     print("\n================================================================================", flush=True)
-    print("🎉 FULL CONVERGENCE PRE-TRAINING RUN COMPLETED SUCCESSFULLY!", flush=True)
+    print("🎉 ULTRA-FAST HIGH-THROUGHPUT PRE-TRAINING RUN COMPLETED SUCCESSFULLY!", flush=True)
     print("================================================================================", flush=True)
 
 if __name__ == "__main__":
