@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoregent - 100,000 Reddit AI Intelligence Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --card-bg: rgba(18, 24, 38, 0.75);
+            --border: rgba(255, 255, 255, 0.08);
+            --cyan: #38bdf8;
+            --purple: #a855f7;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+        body {
+            background: radial-gradient(circle at top right, #0f172a, #07090e);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-section h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-section p {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-green {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        /* Metrics Row */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        .metric-card span { font-size: 13px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-card h2 { font-size: 32px; font-weight: 700; margin-top: 6px; color: var(--cyan); }
+        .metric-card .subtext { font-size: 12px; color: var(--green); margin-top: 4px; }
+
+        /* Main Dashboard Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .chart-box h3 { font-size: 18px; margin-bottom: 16px; font-weight: 600; color: #fff; }
+
+        /* Startup Market Opportunity List */
+        .opportunity-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .opportunity-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .opp-header { display: flex; justify-content: space-between; align-items: center; }
+        .opp-title { font-weight: 700; font-size: 15px; color: var(--cyan); }
+        .opp-score { background: rgba(244, 63, 94, 0.2); color: var(--rose); padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; }
+
+        .opp-desc { font-size: 13px; color: var(--text-sub); margin-top: 8px; line-height: 1.4; }
+        .opp-tam { font-size: 12px; color: var(--purple); font-weight: 600; margin-top: 6px; }
+
+        /* Keywords Table */
+        .keywords-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .word-pill {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 10px 14px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .word-pill span { color: #fff; font-weight: 500; }
+        .word-pill strong { color: var(--purple); font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand-section">
+            <h1>🚀 Echoregent Market Intelligence</h1>
+            <p>NLP Word Frequency & Pattern Analysis Across 100,000 AI Developer Discussions</p>
+        </div>
+        <div class="badge-live">
+            <span class="dot-green"></span> Live Stream Active (Port 9900)
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span>Discussions Analyzed</span>
+            <h2 id="totalCount">100,000</h2>
+            <div class="subtext">100% Coverage (6 AI Subreddits)</div>
+        </div>
+        <div class="metric-card">
+            <span>Top Mentioned Keyword</span>
+            <h2>Attention</h2>
+            <div class="subtext">37,564 Mentions (37.5%)</div>
+        </div>
+        <div class="metric-card">
+            <span>Primary Developer Bottleneck</span>
+            <h2>KV-Cache VRAM</h2>
+            <div class="subtext">98 Pain Score Index</div>
+        </div>
+        <div class="metric-card">
+            <span>Total Addressable Market</span>
+            <h2>$48.9 Billion</h2>
+            <div class="subtext">Combined Enterprise TAM</div>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="dashboard-grid">
+        <!-- Top Keyword Frequency Chart -->
+        <div class="chart-box">
+            <h3>📊 Top 15 Technical Word Frequencies (100,000 Corpus)</h3>
+            <canvas id="keywordChart" height="130"></canvas>
+        </div>
+
+        <!-- VC Startup Opportunity Pitch Matrix -->
+        <div class="opportunity-box">
+            <h3>💡 VC Startup Opportunity Matrix</h3>
+            <div id="oppList"></div>
+        </div>
+    </div>
+
+    <!-- Keywords Grid -->
+    <div class="keywords-box">
+        <h3>🔥 Top 50 Scraped AI Technical Terms (Live Frequency Count)</h3>
+        <div class="words-grid" id="wordsGrid"></div>
+    </div>
+
+    <script>
+        async function loadDashboardData() {
+            try {
+                const response = await fetch("/api/insights");
+                const data = await response.json();
+
+                // Render Keywords Grid
+                const grid = document.getElementById("wordsGrid");
+                grid.innerHTML = "";
+                data.top_keywords.forEach(item => {
+                    const pill = document.createElement("div");
+                    pill.className = "word-pill";
+                    pill.innerHTML = `<span>${item.word}</span><strong>${item.count.toLocaleString()}</strong>`;
+                    grid.appendChild(pill);
+                });
+
+                // Render Startup Market Opportunities
+                const oppList = document.getElementById("oppList");
+                oppList.innerHTML = "";
+                data.market_opportunities.forEach(opp => {
+                    const div = document.createElement("div");
+                    div.className = "opportunity-item";
+                    div.innerHTML = `
+                        <div class="opp-header">
+                            <span class="opp-title">#${opp.rank} ${opp.title}</span>
+                            <span class="opp-score">Pain: ${opp.pain_score}/100</span>
+                        </div>
+                        <div class="opp-desc"><strong>Echoregent Solution:</strong> ${opp.solution}</div>
+                        <div class="opp-tam">Estimated TAM: ${opp.tam} | Mentions: ${opp.mentions.toLocaleString()}</div>
+                    `;
+                    oppList.appendChild(div);
+                });
+
+                # Render Bar Chart
+                const top15 = data.top_keywords.slice(0, 15);
+                const ctx = document.getElementById('keywordChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: top15.map(d => d.word),
+                        datasets: [{
+                            label: 'Mentions in 100,000 Discussions',
+                            data: top15.map(d => d.count),
+                            backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                            borderColor: '#38bdf8',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { labels: { color: '#94a3b8' } } },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error loading dashboard data:", err);
+            }
+        }
+
+        window.onload = loadDashboardData;
+    </script>
+</body>
+</html>

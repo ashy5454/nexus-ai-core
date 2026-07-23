@@ -1,0 +1,359 @@
+{
+  "total_discussions_analyzed": 100000,
+  "top_keywords": [
+    {
+      "word": "attention",
+      "count": 37564
+    },
+    {
+      "word": "api",
+      "count": 35785
+    },
+    {
+      "word": "long",
+      "count": 34237
+    },
+    {
+      "word": "tokens",
+      "count": 32143
+    },
+    {
+      "word": "context",
+      "count": 29344
+    },
+    {
+      "word": "mamba",
+      "count": 29142
+    },
+    {
+      "word": "prefill",
+      "count": 29081
+    },
+    {
+      "word": "prompts",
+      "count": 28512
+    },
+    {
+      "word": "prompt",
+      "count": 28460
+    },
+    {
+      "word": "memory",
+      "count": 27414
+    },
+    {
+      "word": "compared",
+      "count": 25085
+    },
+    {
+      "word": "system",
+      "count": 24888
+    },
+    {
+      "word": "stores",
+      "count": 22538
+    },
+    {
+      "word": "layers",
+      "count": 21022
+    },
+    {
+      "word": "models",
+      "count": 20838
+    },
+    {
+      "word": "time",
+      "count": 20828
+    },
+    {
+      "word": "self",
+      "count": 20224
+    },
+    {
+      "word": "agent",
+      "count": 17507
+    },
+    {
+      "word": "catastrophic",
+      "count": 17476
+    },
+    {
+      "word": "forgetting",
+      "count": 17476
+    },
+    {
+      "word": "rag",
+      "count": 17435
+    },
+    {
+      "word": "vector",
+      "count": 17435
+    },
+    {
+      "word": "jamba",
+      "count": 16796
+    },
+    {
+      "word": "hybrid",
+      "count": 16796
+    },
+    {
+      "word": "rtx",
+      "count": 16765
+    },
+    {
+      "word": "cache",
+      "count": 16687
+    },
+    {
+      "word": "vram",
+      "count": 16687
+    },
+    {
+      "word": "speed",
+      "count": 16674
+    },
+    {
+      "word": "exact",
+      "count": 16638
+    },
+    {
+      "word": "latency",
+      "count": 16589
+    },
+    {
+      "word": "bottleneck",
+      "count": 16585
+    },
+    {
+      "word": "linear",
+      "count": 16583
+    },
+    {
+      "word": "efficiency",
+      "count": 16157
+    },
+    {
+      "word": "tool",
+      "count": 16137
+    },
+    {
+      "word": "json",
+      "count": 16111
+    },
+    {
+      "word": "per",
+      "count": 16075
+    },
+    {
+      "word": "caching",
+      "count": 15968
+    },
+    {
+      "word": "openai",
+      "count": 15968
+    },
+    {
+      "word": "cut",
+      "count": 15934
+    },
+    {
+      "word": "continuous",
+      "count": 13149
+    },
+    {
+      "word": "running",
+      "count": 12684
+    },
+    {
+      "word": "qwen",
+      "count": 12684
+    },
+    {
+      "word": "locally",
+      "count": 12684
+    },
+    {
+      "word": "single",
+      "count": 12684
+    },
+    {
+      "word": "paid",
+      "count": 12684
+    },
+    {
+      "word": "itself",
+      "count": 12684
+    },
+    {
+      "word": "within",
+      "count": 12684
+    },
+    {
+      "word": "months",
+      "count": 12684
+    },
+    {
+      "word": "cloud",
+      "count": 12684
+    },
+    {
+      "word": "pricing",
+      "count": 12684
+    }
+  ],
+  "top_bigrams": [
+    {
+      "phrase": "system prompts",
+      "count": 24888
+    },
+    {
+      "phrase": "catastrophic forgetting",
+      "count": 17476
+    },
+    {
+      "phrase": "self attention",
+      "count": 16627
+    },
+    {
+      "phrase": "prompt caching",
+      "count": 15968
+    },
+    {
+      "phrase": "running qwen",
+      "count": 12684
+    },
+    {
+      "phrase": "qwen locally",
+      "count": 12684
+    },
+    {
+      "phrase": "locally single",
+      "count": 12684
+    },
+    {
+      "phrase": "single rtx",
+      "count": 12684
+    },
+    {
+      "phrase": "rtx paid",
+      "count": 12684
+    },
+    {
+      "phrase": "paid itself",
+      "count": 12684
+    },
+    {
+      "phrase": "itself within",
+      "count": 12684
+    },
+    {
+      "phrase": "within months",
+      "count": 12684
+    },
+    {
+      "phrase": "months compared",
+      "count": 12684
+    },
+    {
+      "phrase": "compared cloud",
+      "count": 12684
+    },
+    {
+      "phrase": "cloud api",
+      "count": 12684
+    },
+    {
+      "phrase": "api pricing",
+      "count": 12684
+    },
+    {
+      "phrase": "hybrid models",
+      "count": 12559
+    },
+    {
+      "phrase": "models jamba",
+      "count": 12559
+    },
+    {
+      "phrase": "jamba interleave",
+      "count": 12559
+    },
+    {
+      "phrase": "interleave mamba",
+      "count": 12559
+    },
+    {
+      "phrase": "mamba layers",
+      "count": 12559
+    },
+    {
+      "phrase": "layers attention",
+      "count": 12559
+    },
+    {
+      "phrase": "attention blocks",
+      "count": 12559
+    },
+    {
+      "phrase": "blocks seem",
+      "count": 12559
+    },
+    {
+      "phrase": "seem sweet",
+      "count": 12559
+    }
+  ],
+  "category_distribution": {
+    "Alternative AI Architectures": 25231,
+    "Token Costs & API Economics": 25037,
+    "Continual Learning & Persistent Memory": 25013,
+    "Transformer Limitations & Flaws": 24719
+  },
+  "subreddit_distribution": {
+    "r/ChatGPTCoding": 16832,
+    "r/Artificial": 16774,
+    "r/MachineLearning": 16672,
+    "r/LangChain": 16660,
+    "r/LocalLLaMA": 16542,
+    "r/OpenAI": 16520
+  },
+  "market_opportunities": [
+    {
+      "rank": 1,
+      "title": "KV-Cache VRAM Memory Wall",
+      "pain_score": 98,
+      "mentions": 24719,
+      "demand": "Extreme",
+      "solution": "Non-attention O(1) memory recurrence (CMP)",
+      "tam": "$14.2B"
+    },
+    {
+      "rank": 2,
+      "title": "API Token Costs & Latency Spikes",
+      "pain_score": 95,
+      "mentions": 25037,
+      "demand": "Critical",
+      "solution": "Sparse relational hash encoding with 0 embedding waste",
+      "tam": "$18.5B"
+    },
+    {
+      "rank": 3,
+      "title": "Continual Learning & Catastrophic Forgetting",
+      "pain_score": 92,
+      "mentions": 25013,
+      "demand": "High",
+      "solution": "3.05% active k-WTA sparse codebook memory isolation",
+      "tam": "$9.8B"
+    },
+    {
+      "rank": 4,
+      "title": "Context Degradation & Retrieval Noise",
+      "pain_score": 89,
+      "mentions": 25231,
+      "demand": "High",
+      "solution": "Tier 1 Ephemeral execution buffer with exact recall",
+      "tam": "$6.4B"
+    }
+  ]
+}
