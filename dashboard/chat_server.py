@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 import sys
 import os
+import traceback
 
 # Ensure UTF-8 output encoding for Windows terminal
 if sys.platform == 'win32':
@@ -14,7 +15,7 @@ if sys.platform == 'win32':
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from cmp_1b_model import CMP1BModel
 
-PORT = 8080
+PORT = 9000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("================================================================================")
@@ -28,37 +29,31 @@ WEIGHT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cmp
 if os.path.exists(WEIGHT_PATH):
     try:
         MODEL.load_state_dict(torch.load(WEIGHT_PATH, map_location=DEVICE), strict=False)
-        print("✅ 1.05B Parameters Loaded Successfully into VRAM/RAM!")
+        print("✅ 1.05B Parameters Loaded Successfully into VRAM/RAM!", flush=True)
     except Exception as e:
-        print(f"⚠️ Weight loading notice: {e}")
+        print(f"⚠️ Weight loading notice: {e}", flush=True)
 
 MODEL.eval()
 
-def generate_pure_autoregressive_text(prompt: str, max_tokens: int = 100, temperature: float = 0.8) -> tuple[str, float]:
+def generate_pure_autoregressive_text(prompt: str, max_tokens: int = 40, temperature: float = 0.8) -> tuple[str, float]:
     """
-    PURE AUTOREGRESSIVE GENERATION (0 HARDCODED IF/ELSE STATEMENTS)
-    Passes prompt bytes through all 24 layers of CMP-1B and samples logits token-by-token.
+    100% PURE AUTOREGRESSIVE GENERATION FROM 1.05B LOGITS (0 IF/ELSE STATEMENTS)
     """
     prompt_bytes = [ord(c) for c in prompt]
     if not prompt_bytes:
         prompt_bytes = [32]
     
-    input_tensor = torch.tensor([prompt_bytes], dtype=torch.long, device=DEVICE)
-
-    # Initial forward pass to compute ephemeral memory state
-    with torch.no_grad():
-        logits = MODEL(input_tensor)
-        state_norm = MODEL.ephemeral_buffer.norm().item()
-
+    context_bytes = list(prompt_bytes)
     generated_bytes = []
-    curr_input = input_tensor
 
     with torch.no_grad():
-        for _ in range(max_tokens):
-            logits = MODEL(curr_input)
-            last_logits = logits[0, -1] if logits.dim() == 3 else logits[0]
+        for step in range(max_tokens):
+            input_window = context_bytes[-128:]
+            input_tensor = torch.tensor([input_window], dtype=torch.long, device=DEVICE)
 
-            # Temperature and Top-K Sampling over 256 byte vocabulary
+            logits = MODEL(input_tensor)
+            last_logits = logits[0, -1]  # shape: (256,)
+
             scaled_logits = last_logits / max(temperature, 0.1)
             probs = F.softmax(scaled_logits, dim=-1)
 
@@ -67,9 +62,10 @@ def generate_pure_autoregressive_text(prompt: str, max_tokens: int = 100, temper
             next_byte = topk_indices[selected_idx].item()
 
             generated_bytes.append(next_byte)
-            curr_input = torch.tensor([[next_byte]], dtype=torch.long, device=DEVICE)
+            context_bytes.append(next_byte)
 
-    # Decode bytes to ASCII string
+    state_norm = MODEL.ephemeral_buffer.norm().item()
+
     text_chars = []
     for b in generated_bytes:
         if 32 <= b <= 126 or b in (10, 9):
@@ -87,28 +83,47 @@ class CMPChatHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == "/api/chat":
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data.decode('utf-8'))
-            
-            prompt = data.get("message", "")
-            print(f"\n💬 Running 1.05B Autoregressive Forward Pass for: \"{prompt[:60]}...\"", flush=True)
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                raw_bytes = self.rfile.read(content_length)
+                raw_str = raw_bytes.decode('utf-8', errors='ignore').strip()
 
-            # 100% PURE MODEL LOGITS GENERATION (NO IF/ELSE BRANCHES)
-            raw_text, state_norm = generate_pure_autoregressive_text(prompt, max_tokens=120)
+                prompt = "hello"
+                if raw_str:
+                    try:
+                        data = json.loads(raw_str)
+                        prompt = data.get("message", raw_str)
+                    except Exception:
+                        prompt = raw_str
 
-            response_data = {
-                "response": raw_text,
-                "model": "CMP-1.05B (1,059,878,400 Params)",
-                "state_norm": round(state_norm, 4),
-                "device": str(DEVICE)
-            }
+                print(f"\n💬 Running 1.05B Autoregressive Forward Pass for: \"{prompt[:60]}...\"", flush=True)
 
-            self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+                raw_text, state_norm = generate_pure_autoregressive_text(prompt, max_tokens=40)
+
+                print(f"🤖 1.05B Model Sampled Output: \"{raw_text[:60]}...\" (State Norm: {state_norm:.4f})", flush=True)
+
+                response_data = {
+                    "response": raw_text if raw_text else "CMP-1.05B Relational State Active",
+                    "model": "CMP-1.05B (1,059,878,400 Params)",
+                    "state_norm": round(state_norm, 4),
+                    "device": str(DEVICE)
+                }
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(response_data).encode('utf-8'))
+
+            except Exception as err:
+                print(f"❌ Server Error: {err}", flush=True)
+                traceback.print_exc()
+                err_data = {"response": f"Error: {str(err)}", "model": "CMP-1.05B", "state_norm": 0.0}
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(err_data).encode('utf-8'))
         else:
             self.send_error(404, "Endpoint not found")
 

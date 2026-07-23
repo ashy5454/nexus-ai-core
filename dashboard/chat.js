@@ -25,14 +25,14 @@ async function sendMessage(event) {
     loadingDiv.innerHTML = `
         <div class="avatar">🧠</div>
         <div class="msg-content">
-            <p><i>CMP-1B executing forward pass across 1.059B params...</i></p>
+            <p><i>CMP-1.05B executing 24-layer forward pass over 1,059,878,400 parameters...</i></p>
         </div>
     `;
     messagesList.appendChild(loadingDiv);
     messagesList.scrollTop = messagesList.scrollHeight;
 
     try {
-        const response = await fetch("/api/chat", {
+        const response = await fetch("http://localhost:9000/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: messageText })
@@ -78,7 +78,7 @@ async function sendMessage(event) {
         errDiv.innerHTML = `
             <div class="avatar">⚠️</div>
             <div class="msg-content" style="color: #f87171;">
-                <p>Error connecting to CMP-1B backend server. Please make sure chat_server.py is running.</p>
+                <p>Error connecting to CMP-1B backend on http://localhost:9000. Check server logs.</p>
             </div>
         `;
         messagesList.appendChild(errDiv);
