@@ -12,7 +12,7 @@ from cmp_scaling_sweep import ScaledCMPModel
 
 """
 ================================================================================
-CMP STAGE 1 & 2 BASELINE PRE-TRAINING ENGINE (50M & 150M MODELS)
+CMP STAGE 3 & 4 FULL-SCALE PRE-TRAINING ENGINE (50M, 150M, 350M, 1.05B MODELS)
 ================================================================================
 Data Sources: Hugging Face 'HuggingFaceFW/fineweb' / 'bigcode/starcoderdata'
 Execution: 100% Local Gradient-Free Competitive Memory Updates (NO BACKPROP)
@@ -29,7 +29,7 @@ def get_dataset_stream():
         print(f"⚠️ Dataset stream notice ({e}). Using synthetic pattern stream.")
         return None
 
-def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500, batch_size=16, seq_len=128):
+def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=1000, batch_size=16, seq_len=128):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\n================================================================================")
     print(f"🚀 PRE-TRAINING [{model_name}] ON {device}")
@@ -67,7 +67,7 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500,
                     total_tokens += batch_size * seq_len
                     batch_seqs = []
 
-                    if step % 100 == 0:
+                    if step % 200 == 0:
                         elapsed = time.time() - start_time
                         tok_sec = total_tokens / elapsed
                         print(f"  * Step [{step}/{max_steps}] | Tokens Processed: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
@@ -80,13 +80,13 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500,
             model(input_tensor)
             total_tokens += batch_size * seq_len
 
-            if step % 100 == 0:
+            if step % 200 == 0:
                 elapsed = time.time() - start_time
                 tok_sec = total_tokens / elapsed
                 print(f"  * Step [{step}/{max_steps}] | Tokens Processed: {total_tokens:,} | Throughput: {tok_sec:.1f} tok/sec")
 
     elapsed_total = time.time() - start_time
-    save_path = f"{model_name.lower().replace('-', '_')}_weights.pt"
+    save_path = f"{model_name.lower().replace('-', '_').replace('.', '_')}_weights.pt"
     torch.save(model.state_dict(), save_path)
 
     print(f"✅ Finished [{model_name}] in {elapsed_total:.2f}s | Saved checkpoint to '{save_path}'")
@@ -94,29 +94,23 @@ def train_baseline_model(model_name, d_model, n_layers, k_active, max_steps=500,
 
 def main():
     print("================================================================================")
-    print("🎯 ARKADHI LABS - STAGE 1 & 2 BASELINE PRE-TRAINING EXECUTION")
+    print("🎯 ARKADHI LABS - STAGE 3 & 4 FULL SCALING SUITE PRE-TRAINING")
     print("================================================================================")
 
-    # 1. Pre-train CMP-50M Baseline (52.8M Params)
-    train_baseline_model(
-        model_name="CMP-50M",
-        d_model=512,
-        n_layers=20,
-        k_active=16,
-        max_steps=500
-    )
+    # 1. CMP-50M (52.8M Params)
+    train_baseline_model(model_name="CMP-50M", d_model=512, n_layers=20, k_active=16, max_steps=1000)
 
-    # 2. Pre-train CMP-150M Baseline (149.9M Params)
-    train_baseline_model(
-        model_name="CMP-150M",
-        d_model=864,
-        n_layers=20,
-        k_active=27,
-        max_steps=500
-    )
+    # 2. CMP-150M (149.9M Params)
+    train_baseline_model(model_name="CMP-150M", d_model=864, n_layers=20, k_active=27, max_steps=1000)
+
+    # 3. CMP-350M (361.3M Params)
+    train_baseline_model(model_name="CMP-350M", d_model=1280, n_layers=22, k_active=40, max_steps=1000)
+
+    # 4. CMP-1.05B (1,059.9M Params)
+    train_baseline_model(model_name="CMP-1.05B", d_model=2100, n_layers=24, k_active=64, max_steps=1000)
 
     print("\n================================================================================")
-    print("🎉 STAGE 1 & 2 BASELINE PRE-TRAINING COMPLETED SUCCESSFULLY!")
+    print("🎉 STAGE 3 & 4 FULL SCALING SUITE COMPLETED SUCCESSFULLY!")
     print("================================================================================")
 
 if __name__ == "__main__":
