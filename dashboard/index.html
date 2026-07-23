@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus AI Core - Multi-Agent Playground & Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <div class="logo">
+        <span class="logo-badge">NEXUS</span>
+        <span class="logo-title">AI CORE</span>
+      </div>
+      <div class="nav-links">
+        <span class="status-indicator"><span class="dot"></span> Engine Ready</span>
+        <a href="https://github.com/ashy5454/nexus-ai-core" target="_blank" class="github-btn">GitHub Repo</a>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+      <!-- Left Panel: Agent Builder & Controls -->
+      <section class="panel controls-panel">
+        <h2>Agent & Pipeline Config</h2>
+        <div class="form-group">
+          <label for="agent-role">Agent Persona & Role</label>
+          <select id="agent-role" class="input-field">
+            <option value="researcher">Autonomous Researcher & Analyzer</option>
+            <option value="coder">Senior Full-Stack Code Auditor</option>
+            <option value="writer">Technical Copywriter & Summarizer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="prompt-input">Input Prompt / Mission Task</label>
+          <textarea id="prompt-input" class="input-field" rows="4" placeholder="Enter task for agent workflow...">Analyze modern AI framework architectures and output key benchmarks.</textarea>
+        </div>
+
+        <button id="run-pipeline-btn" class="btn btn-primary">⚡ Execute Agent Workflow</button>
+      </section>
+
+      <!-- Center Panel: Workflow Node Graph & Logs -->
+      <section class="panel visualizer-panel">
+        <h2>Live Pipeline Execution</h2>
+        <div id="pipeline-nodes" class="nodes-container">
+          <div class="node active">
+            <div class="node-icon">🤖</div>
+            <div class="node-info">
+              <span class="node-title">Input Prompt</span>
+              <span class="node-sub">User Objective</span>
+            </div>
+          </div>
+          <div class="node-connector">→</div>
+          <div class="node">
+            <div class="node-icon">🔍</div>
+            <div class="node-info">
+              <span class="node-title">Research Agent</span>
+              <span class="node-sub">Tool Execution</span>
+            </div>
+          </div>
+          <div class="node-connector">→</div>
+          <div class="node">
+            <div class="node-icon">📝</div>
+            <div class="node-info">
+              <span class="node-title">Writer Agent</span>
+              <span class="node-sub">Markdown Synthesis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="execution-log-box">
+          <h3>Execution Trace Log</h3>
+          <pre id="log-output" class="log-content">// Awaiting pipeline execution...</pre>
+        </div>
+      </section>
+
+      <!-- Right Panel: Final Agent Output -->
+      <section class="panel result-panel">
+        <h2>Synthesized Agent Output</h2>
+        <div id="final-output-card" class="output-card">
+          <p class="placeholder-text">Run the workflow to inspect the final output payload here.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
