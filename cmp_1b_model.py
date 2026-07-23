@@ -50,13 +50,30 @@ class CMP1BBlock(nn.Module):
         self.norm = nn.RMSNorm(d_model)
 
     def forward(self, x: torch.Tensor, recurrent_state: torch.Tensor):
-        bound = self.V_proj(x) * recurrent_state
+        # Broadcast recurrent state across sequence dimension S if needed
+        if recurrent_state.dim() == 2 and x.dim() == 3:
+            state_broadcast = recurrent_state.unsqueeze(1)
+        else:
+            state_broadcast = recurrent_state
+
+        # 1. Hadamard Pairwise Relational Binding
+        bound = self.V_proj(x) * state_broadcast
+
+        # 2. k-WTA Sparsity (Top-64 active neurons out of 2048)
         topk_val, topk_idx = torch.topk(bound, k=self.k_active, dim=-1)
         sparse_bound = torch.zeros_like(bound).scatter_(-1, topk_idx, topk_val)
 
+        # 3. Apply Load-Bearing U_gate
         gated = torch.sigmoid(self.U_gate(x)) * sparse_bound
-        new_state = self.norm(recurrent_state + gated)
-        return new_state, new_state
+
+        # 4. Non-Attention State Recurrence Update
+        new_state = self.norm(state_broadcast + gated)
+        if new_state.dim() == 3:
+            next_recurrent_state = new_state.mean(dim=1)
+        else:
+            next_recurrent_state = new_state
+
+        return new_state, next_recurrent_state
 
 class CMP1BModel(nn.Module):
     """
@@ -90,7 +107,7 @@ class CMP1BModel(nn.Module):
         for layer in self.layers:
             x, state = layer(x, state)
 
-        self.ephemeral_buffer = 0.85 * self.ephemeral_buffer + 0.15 * state.mean(dim=(0, 1), keepdim=True)
+        self.ephemeral_buffer = 0.85 * self.ephemeral_buffer + 0.15 * state.mean(dim=0, keepdim=True)
         logits = self.output_head(x)
         return logits
 
