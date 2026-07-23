@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus AI Core - Multi-Agent Playground & Visualizer</title>
+  <title>Nexus AI Core - 100k Reddit Dataset Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,79 +14,128 @@
     <header class="navbar">
       <div class="logo">
         <span class="logo-badge">NEXUS</span>
-        <span class="logo-title">AI CORE</span>
+        <span class="logo-title">100K REDDIT DATASET DASHBOARD</span>
       </div>
       <div class="nav-links">
-        <span class="status-indicator"><span class="dot"></span> Engine Ready</span>
+        <span class="status-indicator"><span class="dot"></span> 100,001 Lines Loaded</span>
         <a href="https://github.com/ashy5454/nexus-ai-core" target="_blank" class="github-btn">GitHub Repo</a>
       </div>
     </header>
 
     <main class="dashboard-grid">
-      <!-- Left Panel: Agent Builder & Controls -->
-      <section class="panel controls-panel">
-        <h2>Agent & Pipeline Config</h2>
-        <div class="form-group">
-          <label for="agent-role">Agent Persona & Role</label>
-          <select id="agent-role" class="input-field">
-            <option value="researcher">Autonomous Researcher & Analyzer</option>
-            <option value="coder">Senior Full-Stack Code Auditor</option>
-            <option value="writer">Technical Copywriter & Summarizer</option>
-          </select>
+      <!-- Top Metrics Bar -->
+      <section class="metrics-row">
+        <div class="metric-card">
+          <span class="metric-label">TOTAL DATASET ROWS</span>
+          <span class="metric-val">100,000</span>
         </div>
-
-        <div class="form-group">
-          <label for="prompt-input">Input Prompt / Mission Task</label>
-          <textarea id="prompt-input" class="input-field" rows="4" placeholder="Enter task for agent workflow...">Analyze modern AI framework architectures and output key benchmarks.</textarea>
+        <div class="metric-card">
+          <span class="metric-label">TOTAL COMBINED UPVOTES</span>
+          <span class="metric-val">225.8 Million</span>
         </div>
-
-        <button id="run-pipeline-btn" class="btn btn-primary">⚡ Execute Agent Workflow</button>
-      </section>
-
-      <!-- Center Panel: Workflow Node Graph & Logs -->
-      <section class="panel visualizer-panel">
-        <h2>Live Pipeline Execution</h2>
-        <div id="pipeline-nodes" class="nodes-container">
-          <div class="node active">
-            <div class="node-icon">🤖</div>
-            <div class="node-info">
-              <span class="node-title">Input Prompt</span>
-              <span class="node-sub">User Objective</span>
-            </div>
-          </div>
-          <div class="node-connector">→</div>
-          <div class="node">
-            <div class="node-icon">🔍</div>
-            <div class="node-info">
-              <span class="node-title">Research Agent</span>
-              <span class="node-sub">Tool Execution</span>
-            </div>
-          </div>
-          <div class="node-connector">→</div>
-          <div class="node">
-            <div class="node-icon">📝</div>
-            <div class="node-info">
-              <span class="node-title">Writer Agent</span>
-              <span class="node-sub">Markdown Synthesis</span>
-            </div>
-          </div>
+        <div class="metric-card">
+          <span class="metric-label">TOTAL COMMENT RESPONSES</span>
+          <span class="metric-val">19.1 Million</span>
         </div>
-
-        <div class="execution-log-box">
-          <h3>Execution Trace Log</h3>
-          <pre id="log-output" class="log-content">// Awaiting pipeline execution...</pre>
+        <div class="metric-card">
+          <span class="metric-label">COMMUNITY SUBREDDITS</span>
+          <span class="metric-val">6 Subreddits</span>
         </div>
       </section>
 
-      <!-- Right Panel: Final Agent Output -->
-      <section class="panel result-panel">
-        <h2>Synthesized Agent Output</h2>
-        <div id="final-output-card" class="output-card">
-          <p class="placeholder-text">Run the workflow to inspect the final output payload here.</p>
-        </div>
-      </section>
+      <!-- Main Layout: Sidebar & Table -->
+      <div class="main-content-split">
+        <!-- Controls & Categories -->
+        <aside class="panel sidebar-panel">
+          <h2>Research Categories</h2>
+          <ul class="cat-list">
+            <li class="cat-item active">
+              <span class="cat-name">Alternative AI Architectures</span>
+              <span class="cat-badge">25,231</span>
+            </li>
+            <li class="cat-item">
+              <span class="cat-name">Token Costs & API Economics</span>
+              <span class="cat-badge">25,037</span>
+            </li>
+            <li class="cat-item">
+              <span class="cat-name">Continual Learning & Memory</span>
+              <span class="cat-badge">25,013</span>
+            </li>
+            <li class="cat-item">
+              <span class="cat-name">Transformer Limitations & Flaws</span>
+              <span class="cat-badge">24,719</span>
+            </li>
+          </ul>
+
+          <h2 style="margin-top: 1rem;">CSV File Quick Access</h2>
+          <div class="file-info-box">
+            <span class="file-path">reddit_100k_ai_dataset.csv</span>
+            <span class="file-size">100,001 Lines (UTF-8)</span>
+          </div>
+        </aside>
+
+        <!-- Data Explorer Table -->
+        <section class="panel table-panel">
+          <h2>Dataset Explorer (Sample Rows)</h2>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Subreddit</th>
+                  <th>Category</th>
+                  <th>Topic Title</th>
+                  <th>Score</th>
+                  <th>Snippet</th>
+                </tr>
+              </thead>
+              <tbody id="table-body">
+                <tr>
+                  <td><code>t1_c0000001</code></td>
+                  <td><span class="sub-tag">r/LocalLLaMA</span></td>
+                  <td>Token Costs & API Economics</td>
+                  <td>How to cut Claude Code token costs by 80% using prefix headroom</td>
+                  <td>4,120</td>
+                  <td class="snippet-text">Using prompt caching cut our monthly OpenAI API bill by over 45%...</td>
+                </tr>
+                <tr>
+                  <td><code>t1_c0000002</code></td>
+                  <td><span class="sub-tag">r/MachineLearning</span></td>
+                  <td>Alternative AI Architectures</td>
+                  <td>Mamba Selective State Space Models: linear O(N) inference speed</td>
+                  <td>3,890</td>
+                  <td class="snippet-text">Mamba and SSMs are great for linear time complexity...</td>
+                </tr>
+                <tr>
+                  <td><code>t1_c0000003</code></td>
+                  <td><span class="sub-tag">r/LangChain</span></td>
+                  <td>Continual Learning & Memory</td>
+                  <td>Episodic vs Semantic memory stores in autonomous multi-agent systems</td>
+                  <td>2,950</td>
+                  <td class="snippet-text">Continual learning without catastrophic forgetting remains the holy grail...</td>
+                </tr>
+                <tr>
+                  <td><code>t1_c0000004</code></td>
+                  <td><span class="sub-tag">r/OpenAI</span></td>
+                  <td>Transformer Limitations & Flaws</td>
+                  <td>The O(N^2) quadratic attention bottleneck at 128k context length</td>
+                  <td>4,410</td>
+                  <td class="snippet-text">The main issue with this is the KV cache explosion at long contexts...</td>
+                </tr>
+                <tr>
+                  <td><code>t1_c0000005</code></td>
+                  <td><span class="sub-tag">r/ChatGPTCoding</span></td>
+                  <td>Token Costs & API Economics</td>
+                  <td>Why agentic tool loops consume 10x more tokens than one-shot prompts</td>
+                  <td>1,840</td>
+                  <td class="snippet-text">We stopped using standard JSON tool calling and switched to a text schema...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
-  <script src="app.js"></script>
 </body>
 </html>
