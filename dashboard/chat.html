@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMP-1B Interactive Agent Chatbot</title>
+    <link rel="stylesheet" href="chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">🧠</div>
+                <div class="brand-text">
+                    <h2>CMP-1B Studio</h2>
+                    <span>Arkadhi Labs</span>
+                </div>
+            </div>
+            
+            <div class="model-badge">
+                <span class="pulse-dot"></span>
+                <span class="badge-text">1.059B Active Compute Params</span>
+            </div>
+
+            <div class="metrics-card">
+                <h3>Architecture Specs</h3>
+                <div class="metric-item">
+                    <span>Model Dimension</span>
+                    <strong>d_model = 2048</strong>
+                </div>
+                <div class="metric-item">
+                    <span>CMP Layers</span>
+                    <strong>24 Recurrent Blocks</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Active Sparsity</span>
+                    <strong>k = 64 (3.05%)</strong>
+                </div>
+                <div class="metric-item">
+                    <span>Learning Algorithm</span>
+                    <strong>No-Backprop Competitive</strong>
+                </div>
+            </div>
+
+            <div class="memory-card">
+                <h3>Live Memory State</h3>
+                <div class="norm-bar-container">
+                    <div class="norm-fill" id="normFill" style="width: 45%;"></div>
+                </div>
+                <span id="normVal">Ephemeral Norm: 0.8542</span>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div class="header-info">
+                    <h2>CMP-1B Coding & Cognitive Agent</h2>
+                    <p>Non-attention recurrent language architecture • 0 Embedding Table Waste</p>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-online"></span> GPU Server Active
+                </div>
+            </header>
+
+            <div class="messages-list" id="messagesList">
+                <div class="message system-msg">
+                    <div class="avatar">⚡</div>
+                    <div class="msg-content">
+                        <strong>CMP-1B Agent Initialized</strong>
+                        <p>Welcome! I am powered by 1,059,878,400 parameters running local $k$-WTA competitive updates. Type any question or code prompt below!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <footer class="chat-input-area">
+                <form id="chatForm" onsubmit="sendMessage(event)">
+                    <input type="text" id="userInput" placeholder="Ask CMP-1B a question or code task..." autocomplete="off" required />
+                    <button type="submit" id="sendBtn">
+                        <span>Send</span> 🚀
+                    </button>
+                </form>
+            </footer>
+        </main>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>
